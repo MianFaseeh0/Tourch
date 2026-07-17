@@ -11,10 +11,6 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  // Composition root: the one place that knows about the concrete
-  // service implementation. Everything downstream only sees abstractions
-  // (ITorchService) or the ViewModel — this is the only wiring point,
-  // which is what makes each layer swappable and unit-testable on its own.
   final TorchViewModel _torchViewModel = TorchViewModel(
     torchService: MethodChannelTorchService(),
   );

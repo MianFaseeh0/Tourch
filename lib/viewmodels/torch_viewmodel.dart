@@ -3,13 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../models/torch_state.dart';
 import '../services/torch_service.dart';
 
-/// Holds torch UI state and exposes the actions the View can trigger.
-///
-/// This is the M in MVVM's "V" — it depends only on [ITorchService]
-/// (an abstraction), never on the concrete MethodChannel implementation.
-/// That's what makes it trivially testable: inject a fake service in tests,
-/// the real one in production. The View never touches [ITorchService]
-/// directly, so swapping the service layer never requires touching the UI.
 class TorchViewModel extends ChangeNotifier {
   TorchViewModel({required ITorchService torchService})
       : _torchService = torchService;
@@ -35,7 +28,6 @@ class TorchViewModel extends ChangeNotifier {
         _status = TorchStatus.off;
       });
 
-  /// Centralizes the busy/error handling so each action doesn't repeat it.
   Future<void> _guard(Future<void> Function() action) async {
     _isBusy = true;
     _errorMessage = null;

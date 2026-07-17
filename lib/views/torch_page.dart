@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/torch_state.dart';
 import '../viewmodels/torch_viewmodel.dart';
 
-/// Pure presentation. This widget doesn't know a MethodChannel exists —
-/// it only reads [TorchViewModel.status]/[isBusy]/[errorMessage] and calls
-/// [TorchViewModel.turnOn]/[turnOff]. Swap the ViewModel's service, rewrite
-/// the ViewModel's internals, none of that forces a change here.
 class TorchPage extends StatelessWidget {
   const TorchPage({super.key, required this.viewModel});
 

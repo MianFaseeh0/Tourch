@@ -15,7 +15,6 @@ class MainActivity: FlutterActivity() {
 
         val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
-        // Pick a camera that actually has a flash (back camera usually)
         val cameraIdWithFlash = cameraManager.cameraIdList.firstOrNull { id ->
             val chars = cameraManager.getCameraCharacteristics(id)
             val hasFlash = chars.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
