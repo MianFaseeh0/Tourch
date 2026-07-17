@@ -1,16 +1,23 @@
-# tourch
+Torch MVVM
 
-A new Flutter project.
+A cross-platform Flutter torch app built with MVVM and SOLID principles — native flash control via `MethodChannel` on both Android (`CameraManager`) and iOS (`AVCaptureDevice`).
 
-## Getting Started
+- Single Responsibility** — service talks to the platform channel, ViewModel manages state, View renders.
+- Dependency Inversion** — the ViewModel depends on `ITorchService`, not the concrete `MethodChannelTorchService`, so the service is swappable (mocks, tests, alternate implementations) without touching the ViewModel or View.
+- Open/Closed** — new torch backends can be added by implementing `ITorchService`; no existing code changes.
 
-This project is a starting point for a Flutter application.
+## Platform setup
 
-A few resources to get you started if this is your first Flutter project:
+iOS — add a camera usage description to `Info.plist` (required for any torch/camera access):
+```xml
+<key>NSCameraUsageDescription</key>
+<string>Used to control the device torch.</string>
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Android — the Kotlin file's package is `com.example.tourch`. Update it to match your `applicationId` in `build.gradle`, and move the file to the matching folder path under `android/app/src/main/kotlin/`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Method channel contract
+
+Both platforms implement the same channel, `torch_channel`, with two methods:
+ `turnOn` Enables the torch 
+ `turnOff` Disables the torch 
