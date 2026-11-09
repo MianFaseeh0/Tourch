@@ -1,0 +1,26 @@
+# Optional: `brew install xcodegen && xcodegen` generates DeviceDiag.xcodeproj
+name: DeviceDiag
+options:
+  bundleIdPrefix: com.faseeh
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  DeviceDiag:
+    type: application
+    platform: iOS
+    sources:
+      - DeviceDiag
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.faseeh.devicediag
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: DeviceDiag/Info.plist
+      properties:
+        UILaunchScreen: {}
+        NSCameraUsageDescription: "Used by the camera diagnostic test."
+        NSFaceIDUsageDescription: "Used by the biometric diagnostic test."
+        NSLocalNetworkUsageDescription: "Used to send the report to the desktop diagnostic server."
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true

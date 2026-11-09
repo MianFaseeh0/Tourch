@@ -1,23 +1,44 @@
-Torch MVVM
+# DeviceDiag
 
-A cross-platform Flutter torch app built with MVVM and SOLID principles — native flash control via `MethodChannel` on both Android (`CameraManager`) and iOS (`AVCaptureDevice`).
+SwiftUI app that runs hardware diagnostics on an iPhone and sends the results as JSON
+over a WebSocket to a desktop receiver. Built as a small model of a device-diagnostics
+tool: protocol-driven tests, Codable serialization, async/await, real-time socket link.
 
-- Single Responsibility** — service talks to the platform channel, ViewModel manages state, View renders.
-- Dependency Inversion** — the ViewModel depends on `ITorchService`, not the concrete `MethodChannelTorchService`, so the service is swappable (mocks, tests, alternate implementations) without touching the ViewModel or View.
-- Open/Closed** — new torch backends can be added by implementing `ITorchService`; no existing code changes.
+## What it tests
+| Test | Framework | Notes |
+|---|---|---|
+| Battery | UIDevice | level, charge state, Low Power Mode |
+| Display / ambient light | UIScreen | iOS has no public ambient-light API; reports brightness as a proxy |
+| Accelerometer | CoreMotion | averages 10 samples, expects ~1 g at rest |
+| Camera | AVFoundation | permission, camera discovery, builds a capture input |
+| Biometrics | LocalAuthentication | runs a real Face ID / Touch ID prompt |
+| NFC | CoreNFC | hardware-support check only |
 
-## Platform setup
+## Architecture
+- `DiagnosticTest` protocol: every test is one struct; the view model never changes when you add one.
+- MVVM: `DiagnosticsViewModel` (`@MainActor`, `ObservableObject`) owns state; views only render it.
+- `Codable` models with snake_case key strategy and ISO-8601 dates.
+- `DiagnosticsSocket`: `URLSessionWebSocketTask`, sends the report, awaits a `ServerAck`.
+- `[weak manager]` in the CoreMotion handler avoids a retain cycle.
 
-iOS — add a camera usage description to `Info.plist` (required for any torch/camera access):
-```xml
-<key>NSCameraUsageDescription</key>
-<string>Used to control the device torch.</string>
+## Run it
+**Create the project (pick one):**
+- Xcode: File > New > Project > iOS App (SwiftUI, name `DeviceDiag`, iOS 16+). Delete the default
+  `ContentView.swift` and app file, drag in the `DeviceDiag/` folder contents. Add to Info:
+  `NSCameraUsageDescription`, `NSFaceIDUsageDescription`, `NSLocalNetworkUsageDescription`,
+  and App Transport Security > Allows Local Networking = YES.
+- XcodeGen: `brew install xcodegen && xcodegen`, open `DeviceDiag.xcodeproj`.
+
+**Start the receiver (on your Mac):**
 ```
+cd server && npm install && npm start
+```
+It prints the `ws://IP:8080` address. Put your Mac and iPhone on the same Wi-Fi, paste that
+address into the app, tap **Run all**, then **Send report to server**.
 
-Android — the Kotlin file's package is `com.example.tourch`. Update it to match your `applicationId` in `build.gradle`, and move the file to the matching folder path under `android/app/src/main/kotlin/`.
+Run on a real iPhone: the Simulator has no battery, accelerometer, camera or NFC.
+If Xcode complains about concurrency, set Swift Language Version to 5.
 
-Method channel contract
-
-Both platforms implement the same channel, `torch_channel`, with two methods:
- `turnOn` Enables the torch 
- `turnOff` Disables the torch 
+## Ideas to extend
+CoreMotion gyro test, flashlight/torch test, a unit-test target for the models' JSON round-trip,
+a Swift Package for the tests, reading NFC tags with `NFCNDEFReaderSession`.
